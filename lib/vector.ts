@@ -65,3 +65,52 @@ export async function searchDocuments(
   return results as StoredDocument[];
 }
 
+export async function listDocuments(
+  limit = 100,
+): Promise<StoredDocument[]> {
+  const db = await getDb();
+  const tables = await db.tableNames();
+
+  if (!tables.includes(TABLE_NAME)) {
+    return [];
+  }
+
+  const table = await db.openTable(TABLE_NAME);
+  // Fetch up to `limit` rows; filter ensures we get any row with a non-null id
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const query = (table as any).filter('id IS NOT NULL').limit(limit);
+  const results = await query.execute();
+  return results as StoredDocument[];
+}
+
+export async function deleteDocument(id: string): Promise<void> {
+  const db = await getDb();
+  const tables = await db.tableNames();
+
+  if (!tables.includes(TABLE_NAME)) {
+    return;
+  }
+
+  const table = await db.openTable(TABLE_NAME);
+  // Use SQL-style predicate to delete by id
+  // Escape single quotes in id to avoid breaking the predicate
+  const safeId = id.replace(/'/g, "''");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (table as any).delete(`id = '${safeId}'`);
+}
+
+export async function deleteAllDocuments(): Promise<void> {
+  const db = await getDb();
+  const tables = await db.tableNames();
+
+  if (!tables.includes(TABLE_NAME)) {
+    return;
+  }
+
+  const table = await db.openTable(TABLE_NAME);
+  // Delete all rows; predicate must not be empty, so use a tautology
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (table as any).delete('1 = 1');
+}
+
+

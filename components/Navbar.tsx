@@ -11,7 +11,7 @@ export default function Navbar() {
               Local AI Assistant
             </h1>
             <p className="text-[11px] text-slate-400 md:text-xs">
-              TinyLlama · Ollama · RAG
+            Deepseek-r1:1.5b · Ollama · RAG
             </p>
           </div>
         </div>
